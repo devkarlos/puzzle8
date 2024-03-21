@@ -1,1 +1,1 @@
-# 8-puzzle
+# puzzle 8

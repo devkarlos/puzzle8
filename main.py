@@ -28,6 +28,7 @@ class Board:
                 return [i, lst[i].index(to_find)]
             else:
                 continue
+        return None
 
     # The Manhattan distance between a board and the goal board is the sum of the Manhattan distances (sum of the vertical and horizontal distance) from the tiles to their goal positions. 
     def manhattan(self):
@@ -36,7 +37,10 @@ class Board:
             for ii in range(0,3):
                 if self.tiles[i][ii] != self.goal[i][ii] and self.goal[i][ii] != 0:
                     tile_pos = self.get_item_pos(self.tiles, self.goal[i][ii])
-                    print(tile_pos, " : ", self.goal[i][ii])
+                    goal_pos = self.get_item_pos(self.goal, self.goal[i][ii])
+                    for p in range(0,2):
+                        distance += abs(goal_pos[p] - tile_pos[p])
+        return distance
 
     def isGoal(self) -> bool:
         return self.tiles == self.goal
@@ -49,5 +53,5 @@ tiles = [
 
 board = Board(tiles)
 
-# print(board.hamming())
+print(board.hamming())
 print(board.manhattan())
