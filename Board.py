@@ -55,60 +55,59 @@ class Board:
     
     
     def switch_items_in_tile(self, tile: list, item_pos1: list, item_pos2: list) -> list:
-        temp_tile: list = [row[:] for row in tile]
-        temp_value = temp_tile[item_pos1[0]][item_pos1[1]]
+        tile_copy: list = [row[:] for row in tile]
+        temp_value = tile_copy[item_pos1[0]][item_pos1[1]]
         
-        temp_tile[item_pos1[0]][item_pos1[1]] = temp_tile[item_pos2[0]][item_pos2[1]]
-        temp_tile[item_pos2[0]][item_pos2[1]] = temp_value
+        tile_copy[item_pos1[0]][item_pos1[1]] = tile_copy[item_pos2[0]][item_pos2[1]]
+        tile_copy[item_pos2[0]][item_pos2[1]] = temp_value
         
-        return temp_tile
+        return tile_copy
 
 
     # 0 in the corner -> 2 neigbors
     # 0 in the center -> 4 neigbors
     # 0 in the middle of row/column -> 3 neigbors
     def get_neighbours(self) -> list:
-        temp_tile: list = [row[:] for row in self.tiles]
-        neighbors: list = []
+        tile_copy: list = [row[:] for row in self.tiles]
+        neighbours: list = []
 
         zero_pos: list = self.get_item_pos(self.tiles, 0)
         zero_x: int = zero_pos[0]
         zero_y: int = zero_pos[1]
         
-        # TODO: Recode this algorithm
         if zero_x == 1 and zero_y in [0,2]: # zero is in the left/right center
-            neighbors.append(self.switch_items_in_tile(temp_tile, zero_pos, [zero_x+1, zero_y])) # left/right center
-            neighbors.append(self.switch_items_in_tile(temp_tile, zero_pos, [zero_x-1, zero_y])) # left/right center
+            neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x+1, zero_y])) # left/right center
+            neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x-1, zero_y])) # left/right center
             if zero_y == 0:
-                neighbors.append(self.switch_items_in_tile(temp_tile, zero_pos, [zero_x, zero_y-1])) # right top
+                neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x, zero_y-1])) # right top
             else: # zero_y == 2
-                neighbors.append(self.switch_items_in_tile(temp_tile, zero_pos, [zero_x, zero_y+1])) # left bottom
+                neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x, zero_y+1])) # left bottom
 
         elif zero_x in [0,2] and zero_y == 1: # zero is in the top/bottom center
-            neighbors.append(self.switch_items_in_tile(temp_tile, zero_pos, [zero_x, zero_y+1])) # left/right center
-            neighbors.append(self.switch_items_in_tile(temp_tile, zero_pos, [zero_x, zero_y-1])) # left/right center
+            neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x, zero_y+1])) # left/right center
+            neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x, zero_y-1])) # left/right center
             if zero_x == 0:
-                neighbors.append(self.switch_items_in_tile(temp_tile, zero_pos, [zero_x+1, zero_y])) # right top
+                neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x+1, zero_y])) # right top
             else: # zero_x == 2
-                neighbors.append(self.switch_items_in_tile(temp_tile, zero_pos, [zero_x-1, zero_y])) # left bottom
+                neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x-1, zero_y])) # left bottom
 
         elif zero_x in [0, 2] and zero_y in [0, 2]: # corners
             if zero_x == 0:
-                neighbors.append(self.switch_items_in_tile(temp_tile, zero_pos, [zero_x, zero_y+1]))
+                neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x, zero_y+1]))
             else: # zero_x == 2
-                neighbors.append(self.switch_items_in_tile(temp_tile, zero_pos, [zero_x, zero_y-1]))
+                neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x, zero_y-1]))
             if zero_y == 0:
-                neighbors.append(self.switch_items_in_tile(temp_tile, zero_pos, [zero_x+1, zero_y]))
+                neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x+1, zero_y]))
             else: # zero_y == 2
-                neighbors.append(self.switch_items_in_tile(temp_tile, zero_pos, [zero_x-1, zero_y]))
+                neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x-1, zero_y]))
 
         else: # center
-            neighbors.append(self.switch_items_in_tile(temp_tile, zero_pos, [zero_x+1, zero_y]))
-            neighbors.append(self.switch_items_in_tile(temp_tile, zero_pos, [zero_x-1, zero_y]))
-            neighbors.append(self.switch_items_in_tile(temp_tile, zero_pos, [zero_x, zero_y+1]))
-            neighbors.append(self.switch_items_in_tile(temp_tile, zero_pos, [zero_x, zero_y-1]))
+            neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x+1, zero_y]))
+            neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x-1, zero_y]))
+            neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x, zero_y+1]))
+            neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x, zero_y-1]))
 
-        return neighbors
+        return neighbours
     
    
     def is_solvable(self) -> bool:
@@ -124,7 +123,8 @@ class Board:
             return True
         
         return False
+         
             
-    def print_tile(self):
+    def print_board(self):
         for row in self.tiles:
             print(row)

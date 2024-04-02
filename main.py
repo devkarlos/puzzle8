@@ -1,6 +1,7 @@
 from Board import Board
 from Solver import Solver
 
+
 tiles = [
     [0,1,3],
     [4,2,5],
@@ -28,4 +29,4 @@ for neighbour in board.get_neighbours():
 print("\n----")
 print("neighbours:", i)
 print("is solvable: ", board.is_solvable())
-board.print_tile()
+board.print_board()
