@@ -6,4 +6,4 @@
 
 ## TODO
 
-- [ ] Recode `get_neighbours`
+- [x] Recode `get_neighbours`

@@ -1,26 +1,33 @@
 class Board:
-    def __init__(self, tiles) -> None:
-        self.tiles: list = tiles
-        self.size: int = 0
-        self.goal: list = [
-            [1,2,3],
-            [4,5,6],
-            [7,8,0] # 0 represents the empty space
-        ]
+    def __init__(self, tiles, board_size: int) -> None:
+        self.tiles: list[list[int]] = tiles
+        self.board_size = board_size
+        self.goal: list[list[int]] = self.generate_goal()
+        
+
+    def generate_goal(self) -> list[list[int]]:
+        goal = [[0] * self.board_size for _ in range(self.board_size)]
+        num = 1
+        for i in range(self.board_size):
+            for j in range(self.board_size):
+                goal[i][j] = num
+                num = (num + 1) % (self.board_size * self.board_size)
+        goal[-1][-1] = 0  # Empty space represented by 0
+        return goal
 
 
     # The Hamming distance betweeen a board and the goal board is the number of tiles in the wrong position
     def hamming(self) -> int:
         counter = 0
-        for i in range(0, 3):
-            for ii in range(0, 3):
+        for i in range(0, self.board_size):
+            for ii in range(0, self.board_size):
                 if self.tiles[i][ii] != self.goal[i][ii] and self.tiles[i][ii] != 0:
                     counter+=1
         return counter
 
 
-    def get_item_pos(self, lst: list, to_find: int) -> list:
-        for i in range(0,3):
+    def get_tile_pos(self, lst: list, to_find: int) -> list[int]:
+        for i in range(0, self.board_size):
             if to_find in lst[i]:
                 return [i, lst[i].index(to_find)]
         return []
@@ -30,11 +37,11 @@ class Board:
     # (sum of the vertical and horizontal distance) from the tiles to their goal positions. 
     def manhattan(self) -> int:
         distance = 0
-        for i in range(0,3):
-            for ii in range(0,3):
+        for i in range(0, self.board_size):
+            for ii in range(0, self.board_size):
                 if self.tiles[i][ii] != self.goal[i][ii] and self.goal[i][ii] != 0:
-                    tile_pos = self.get_item_pos(self.tiles, self.goal[i][ii])
-                    goal_pos = self.get_item_pos(self.goal, self.goal[i][ii])
+                    tile_pos = self.get_tile_pos(self.tiles, self.goal[i][ii])
+                    goal_pos = self.get_tile_pos(self.goal, self.goal[i][ii])
                     for p in range(0,2):
                         distance += abs(goal_pos[p] - tile_pos[p])
         return distance
@@ -42,89 +49,37 @@ class Board:
 
     def is_goal(self) -> bool:
         return self.tiles == self.goal
-    
-    
+
+
     def equals(self, board) -> bool:
         return self.tiles == board
-    
-    
-    def replace_item_in_tile(self, tile: list, item_pos: list, replace_with: int) -> list:
-        temp_tile: list = [row[:] for row in tile]
-        temp_tile[item_pos[0]][item_pos[1]] = replace_with
-        return temp_tile
-    
-    
-    def switch_items_in_tile(self, tile: list, item_pos1: list, item_pos2: list) -> list:
-        tile_copy: list = [row[:] for row in tile]
-        temp_value = tile_copy[item_pos1[0]][item_pos1[1]]
-        
-        tile_copy[item_pos1[0]][item_pos1[1]] = tile_copy[item_pos2[0]][item_pos2[1]]
-        tile_copy[item_pos2[0]][item_pos2[1]] = temp_value
-        
-        return tile_copy
 
 
-    # 0 in the corner -> 2 neigbors
-    # 0 in the center -> 4 neigbors
-    # 0 in the middle of row/column -> 3 neigbors
-    def get_neighbours(self) -> list:
-        tile_copy: list = [row[:] for row in self.tiles]
-        neighbours: list = []
+    def get_neighbours(self) -> list[list[int]]:
+        neighbours = []
+        zero_pos = self.get_tile_pos(self.tiles, 0)
+        zero_x, zero_y = zero_pos
 
-        zero_pos: list = self.get_item_pos(self.tiles, 0)
-        zero_x: int = zero_pos[0]
-        zero_y: int = zero_pos[1]
-        
-        if zero_x == 1 and zero_y in [0,2]: # zero is in the left/right center
-            neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x+1, zero_y])) # left/right center
-            neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x-1, zero_y])) # left/right center
-            if zero_y == 0:
-                neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x, zero_y-1])) # right top
-            else: # zero_y == 2
-                neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x, zero_y+1])) # left bottom
+        moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
-        elif zero_x in [0,2] and zero_y == 1: # zero is in the top/bottom center
-            neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x, zero_y+1])) # left/right center
-            neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x, zero_y-1])) # left/right center
-            if zero_x == 0:
-                neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x+1, zero_y])) # right top
-            else: # zero_x == 2
-                neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x-1, zero_y])) # left bottom
+        for x, y in moves:
+            new_zero_x, new_zero_y = zero_x + x, zero_y + y
+            
+            if 0 <= new_zero_x < self.board_size and 0 <= new_zero_y < self.board_size:
+                neighbour = [row[:] for row in self.tiles]
 
-        elif zero_x in [0, 2] and zero_y in [0, 2]: # corners
-            if zero_x == 0:
-                neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x, zero_y+1]))
-            else: # zero_x == 2
-                neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x, zero_y-1]))
-            if zero_y == 0:
-                neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x+1, zero_y]))
-            else: # zero_y == 2
-                neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x-1, zero_y]))
-
-        else: # center
-            neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x+1, zero_y]))
-            neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x-1, zero_y]))
-            neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x, zero_y+1]))
-            neighbours.append(self.switch_items_in_tile(tile_copy, zero_pos, [zero_x, zero_y-1]))
+                neighbour[zero_x][zero_y], neighbour[new_zero_x][new_zero_y] = neighbour[new_zero_x][new_zero_y], neighbour[zero_x][zero_y]
+                neighbours.append(neighbour)
 
         return neighbours
-    
-   
+
+
     def is_solvable(self) -> bool:
         inversions = 0
-        board = [tile for row in self.tiles for tile in row]
+        board_flat = [tile for row in self.tiles for tile in row if tile != 0]
         
-        for i in range(len(board)):
-            if i != 0 and board[i] != 0:
-                if board[i] < board[i-1]:
-                    inversions+=1
-                    
-        if inversions%2==0:
-            return True
-        
-        return False
-         
-            
-    def print_board(self):
-        for row in self.tiles:
-            print(row)
+        for i in range(len(board_flat)):
+            for j in range(i + 1, len(board_flat)):
+                if board_flat[i] > board_flat[j]:
+                    inversions += 1
+        return inversions % 2 == 0
